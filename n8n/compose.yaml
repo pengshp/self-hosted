@@ -1,0 +1,27 @@
+---
+services:
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: n8n
+    #ports:
+    #  - "5678:5678/tcp"
+    volumes:
+      - ./data:/home/node/.n8n
+    networks:
+      - proxy
+    restart: unless-stopped
+    environment:
+      - PUID = 1000
+      - PGID = 1000
+      - TZ = "Asia/Shanghai"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.n8n-secure.entrypoints=websecure"
+      - "traefik.http.routers.n8n-secure.rule=Host(`n8n.esxi.lan`)"
+      - "traefik.http.routers.n8n-secure.service=n8n-service"
+      - "traefik.http.services.n8n-service.loadbalancer.server.port=5678"
+
+networks:
+  proxy:
+    external: true

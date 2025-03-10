@@ -1,0 +1,27 @@
+---
+services:
+  deeplx:
+    image: ghcr.io/owo-network/deeplx:latest
+    container_name: deeplx-c
+    restart: always
+    # ports:
+    #   - "1188:1188"
+    environment:
+      - UID=1000
+      - GID=1000
+      - TOKEN=<token>
+    networks:
+      - proxy
+    labels:
+      - "diun.enable=true"
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.deeplx-secure.entrypoints=websecure"
+      - "traefik.http.routers.deeplx-secure.tls=true"
+      - "traefik.http.routers.deeplx-secure.rule=Host(`deeplx.esxi.lan`)"
+      - "traefik.http.routers.deeplx-secure.service=deeplx-service"
+      - "traefik.http.services.deeplx-service.loadbalancer.server.port=1188"
+
+networks:
+  proxy:
+    external: true

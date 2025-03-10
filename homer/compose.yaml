@@ -1,0 +1,30 @@
+---
+services:
+  homer:
+    image: b4bz/homer:latest
+    container_name: homer-c
+    # ports:
+    #  - "6089:8080/tcp"
+    volumes:
+      - ./www:/www/assets
+    environment:
+      - UID=1000
+      - GID=1000
+      - IPV6_DISABLE=1
+      - INIT_ASSETS=1
+    networks:
+      - proxy
+    restart: unless-stopped
+    labels:
+      - "diun.enable=true"
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.homer-secure.entrypoints=websecure"
+      - "traefik.http.routers.homer-secure.tls=true"
+      - "traefik.http.routers.homer-secure.rule=Host(`homer.esxi.lan`)"
+      - "traefik.http.routers.homer-secure.service=homer-service"
+      - "traefik.http.services.homer-service.loadbalancer.server.port=8080"
+
+networks:
+  proxy:
+    external: true

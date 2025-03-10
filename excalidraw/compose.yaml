@@ -1,0 +1,26 @@
+---
+services:
+  draw:
+    image: excalidraw/excalidraw:latest
+    container_name: excalidraw
+    # ports:
+    #  - "7899:80/tcp"
+    environment:
+      - UID=1000
+      - GID=1000
+    networks:
+      - proxy
+    restart: always
+    labels:
+      - "diun.enable=true"
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.draw-secure.entrypoints=websecure"
+      - "traefik.http.routers.draw-secure.tls=true"
+      - "traefik.http.routers.draw-secure.rule=Host(`draw.esxi.lan`)"
+      - "traefik.http.routers.draw-secure.service=draw-service"
+      - "traefik.http.services.draw-service.loadbalancer.server.port=80"
+
+networks:
+  proxy:
+    external: true

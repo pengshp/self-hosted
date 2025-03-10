@@ -1,0 +1,81 @@
+---
+services:
+  gitea:
+    image: gitea/gitea:1.22.3
+    volumes:
+      - ./gitea/app/:/data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - "2022:22"
+      # - "3000:3000"
+    depends_on:
+      - db
+    networks:
+      - gitea-net
+      - proxy
+    environment:
+      - USER_UID=1000
+      - USER_GID=1000
+      - APP_NAME=Gitea
+      - RUN_MODE=prod
+      - RUN_USER=git
+      - SSH_DOMAIN=git.esxi.lan
+      - SSH_PORT=22
+      - SSH_LISTEN_PORT=22
+      - HTTP_PORT=3000
+      - ROOT_URL=https://git.esxi.lan
+      - LFS_START_SERVER=true
+      - GITEA__database__DB_TYPE=mysql
+      - GITEA__database__HOST=db:3306
+      - GITEA__database__NAME=gitea
+      - GITEA__database__USER=gitea
+      - GITEA__database__PASSWD=gitea
+    restart: always
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.gitea-secure.entrypoints=websecure"
+      - "traefik.http.routers.gitea-secure.tls=true"
+      - "traefik.http.routers.gitea-secure.rule=Host(`git.esxi.lan`)"
+      - "traefik.http.routers.gitea-secure.service=gitea-service"
+      - "traefik.http.services.gitea-service.loadbalancer.server.port=3000"
+
+  db:
+    image: mariadb:lts
+    restart: always
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    networks:
+      - gitea-net
+    environment:
+      - TZ=Asia/Shanghai
+      - MYSQL_ROOT_PASSWORD=zxcv
+      - MYSQL_DATABASE=gitea
+      - MYSQL_USER=gitea
+      - MYSQL_PASSWORD=gitea
+    volumes:
+      - ./gitea/db/:/var/lib/mysql
+
+  runner:
+    image: gitea/act_runner:latest
+    restart: always
+    depends_on:
+      - gitea
+    networks:
+      - gitea-net
+    environment:
+      CONFIG_FILE: /config.yaml
+      GITEA_INSTANCE_URL: "http://gitea:3000"
+      GITEA_RUNNER_REGISTRATION_TOKEN: "xxxxxxvIG"
+      GITEA_RUNNER_NAME: "gitearunner"
+      GITEA_RUNNER_LABELS: "docker"
+    volumes:
+      - ./runner/config.yaml:/config.yaml
+      - ./runner/data:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+
+networks:
+  gitea-net:
+    external: false
+  proxy:
+    external: true

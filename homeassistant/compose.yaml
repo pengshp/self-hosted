@@ -1,0 +1,29 @@
+---
+services:
+  homeassistant:
+    image: homeassistant/home-assistant:stable
+    container_name: home-assistant-c
+    volumes:
+      - ./config:/config
+    environment:
+      - TZ=Asia/Shanghai
+      - PUID=1000
+      - PGID=1000
+    restart: unless-stopped
+    #network_mode: host
+    #ports:
+    #  - 8123:8123
+    networks:
+      - proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.ha-secure.entrypoints=websecure"
+      - "traefik.http.routers.lobe-secure.tls=true"
+      - "traefik.http.routers.ha-secure.rule=Host(`ha.esxi.lan`)"
+      - "traefik.http.routers.ha-secure.service=ha-service"
+      - "traefik.http.services.ha-service.loadbalancer.server.port=8123"
+
+networks:
+  proxy:
+    external: true

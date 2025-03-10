@@ -1,0 +1,23 @@
+---
+services:
+  beszel:
+    image: henrygd/beszel:latest
+    container_name: beszel-c
+    volumes:
+      - ./data:/beszel_data
+    restart: always
+    networks:
+      - proxy
+    labels:
+      - "diun.enable=true"
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.beszel-secure.entrypoints=websecure"
+      - "traefik.http.routers.beszel-secure.tls=true"
+      - "traefik.http.routers.beszel-secure.rule=Host(`beszel.esxi.lan`)"
+      - "traefik.http.routers.beszel-secure.service=beszel-service"
+      - "traefik.http.services.beszel-service.loadbalancer.server.port=8090"
+
+networks:
+  proxy:
+    external: true

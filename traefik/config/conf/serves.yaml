@@ -1,0 +1,95 @@
+---
+http:
+  middlewares:
+    default-ipallowlist:
+      ipAllowList:
+        sourceRange:
+          - "10.0.0.0/8"
+          - "192.168.0.0/16"
+          - "172.16.0.0/12"
+
+    default-headers:
+      headers:
+        frameDeny: true
+        browserXssFilter: true
+        stsPreload: true
+        stsIncludeSubdomains: true
+        forceSTSHeader: true
+        customRequestHeaders:
+          X-Forwarded-Proto: https
+
+    secured:
+      chain:
+        middlewares:
+          - default-ipallowlist
+          - default-headers
+
+  # region routers
+  routers:
+    esxi:
+      entryPoints:
+        - websecure
+      rule: "Host(`vm.esxi.lan`)"
+      middlewares:
+        - secured
+      service: esxi
+      tls: {}
+
+    dash:
+      entryPoints:
+        - websecure
+      rule: "Host(`dash.esxi.lan`)"
+      service: dash
+      tls: {}
+
+    alist:
+      entryPoints:
+        - websecure
+      rule: "Host(`pan.esxi.lan`)"
+      service: alist
+      tls: {}
+
+    couchdb:
+      entryPoints:
+        - websecure
+      rule: "Host(`sync.esxi.lan`)"
+      service: couchdb
+      tls: {}
+
+    aria2:
+      entryPoints:
+        - web
+      rule: "Host(`dl.esxi.lan`)"
+      service: aria2
+
+  # region services
+  services:
+    esxi:
+      loadBalancer:
+        servers:
+          - url: "https://172.16.10.11"
+        passHostHeader: true
+
+    dash:
+      loadBalancer:
+        servers:
+          - url: "http://172.16.10.100:3000"
+        passHostHeader: true
+
+    alist:
+      loadBalancer:
+        servers:
+          - url: "http://172.16.10.100:5244"
+        passHostHeader: true
+
+    couchdb:
+      loadBalancer:
+        servers:
+          - url: "http://172.16.10.100:5984"
+        passHostHeader: true
+
+    aria2:
+      loadBalancer:
+        servers:
+          - url: "http://172.16.10.100:6880"
+        passHostHeader: true

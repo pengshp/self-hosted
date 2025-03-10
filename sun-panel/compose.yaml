@@ -1,0 +1,33 @@
+---
+services:
+  sunpanel:
+    image: hslr/sun-panel:latest
+    container_name: Sun-Panel-c
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Asia/Shanghai
+    volumes:
+      - ./sun-panel/conf:/app/conf
+      - ./sun-panel/uploads:/app/uploads
+      # - ./sun-panel/database:/app/database
+    networks:
+      - proxy
+    dns:
+      - 172.16.10.18
+      - 223.5.5.5
+    dns_search: esxi.lan
+    restart: always
+    labels:
+      - "diun.enable=true"
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.sunpanel-secure.entrypoints=websecure"
+      - "traefik.http.routers.sunpanel-secure.tls=true"
+      - "traefik.http.routers.sunpanel-secure.rule=Host(`www.esxi.lan`)"
+      - "traefik.http.routers.sunpanel-secure.service=sunpanel-service"
+      - "traefik.http.services.sunpanel-service.loadbalancer.server.port=3002"
+
+networks:
+  proxy:
+    external: true

@@ -1,0 +1,28 @@
+---
+services:
+  memos:
+    image: neosmemo/memos:latest
+    container_name: memos-c
+    # ports:
+    #  - "6089:8080/tcp"
+    volumes:
+      - ./memos:/var/opt/memos
+    environment:
+      - UID=1000
+      - GID=1000
+    networks:
+      - proxy
+    restart: always
+    labels:
+      - "diun.enable=true"
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.memos-secure.entrypoints=websecure"
+      - "traefik.http.routers.memos-secure.tls=true"
+      - "traefik.http.routers.memos-secure.rule=Host(`memos.esxi.lan`)"
+      - "traefik.http.routers.memos-secure.service=memos-service"
+      - "traefik.http.services.memos-service.loadbalancer.server.port=5230"
+
+networks:
+  proxy:
+    external: true

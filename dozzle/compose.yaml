@@ -1,0 +1,27 @@
+---
+services:
+  dozzle:
+    image: amir20/dozzle:latest
+    container_name: dozzle-log-c
+    # ports:
+    #  - "8030:8080/tcp"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    restart: always
+    networks:
+      - proxy
+    environment:
+      - DOZZLE_REMOTE_AGENT=172.16.10.100:7007
+    labels:
+      - "diun.enable=true"
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.dozzle-secure.entrypoints=websecure"
+      - "traefik.http.routers.dozzle-secure.tls=true"
+      - "traefik.http.routers.dozzle-secure.rule=Host(`dozzle.esxi.lan`)"
+      - "traefik.http.routers.dozzle-secure.service=dozzle-service"
+      - "traefik.http.services.dozzle-service.loadbalancer.server.port=8080"
+
+networks:
+  proxy:
+    external: true

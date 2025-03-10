@@ -1,0 +1,49 @@
+---
+services:
+  adguard:
+    image: adguard/adguardhome:latest
+    container_name: adguard-c
+    ports:
+      - 53:53/tcp
+      - 53:53/udp
+    volumes:
+      - ./confdir:/opt/adguardhome/conf
+      - ./workdir:/opt/adguardhome/work
+    restart: always
+    networks:
+      - adguard-net
+      - proxy
+    environment:
+      - PUID=1000
+      - PGID=1000
+    labels:
+      - "diun.enable=true"
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.adguard-secure.entrypoints=websecure"
+      - "traefik.http.routers.adguard-secure.tls=true"
+      - "traefik.http.routers.adguard-secure.rule=Host(`adguard.esxi.lan`)"
+      - "traefik.http.routers.adguard-secure.service=adguard-service"
+      - "traefik.http.services.adguard-service.loadbalancer.server.port=3000"
+
+  adguard-exporter:
+    image: "ghcr.io/henrywhitaker3/adguard-exporter:latest"
+    container_name: adguard-exporter-c
+    ports:
+      - "9618:9618"
+    environment:
+      - INTERVAL=60s
+      - ADGUARD_PASSWORDS=zxcvbnm
+      - ADGUARD_USERNAMES=admin
+      - ADGUARD_SERVERS=http://adguard:3000
+    restart: unless-stopped
+    networks:
+      - adguard-net
+    labels:
+      - "diun.enable=true"
+
+networks:
+  adguard-net:
+    driver: bridge
+  proxy:
+    external: true

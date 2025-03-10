@@ -1,0 +1,41 @@
+---
+services:
+  lobe-chat:
+    image: lobehub/lobe-chat:latest
+    container_name: lobe-chat-c
+    # ports:
+    #   - "3210:3210"
+    environment:
+      - OPENAI_API_KEY
+      - OPENAI_PROXY_URL
+      - ACCESS_CODE
+      - GOOGLE_API_KEY
+      - ZHIPU_API_KEY
+      - MOONSHOT_API_KEY
+      - ANTHROPIC_API_KEY
+      - OLLAMA_PROXY_URL
+      - GROQ_API_KEY
+      - OPENROUTER_API_KEY
+      - DEEPSEEK_API_KEY
+      - HUNYUAN_API_KEY
+      - SILICONCLOUD_API_KEY
+      - SEARXNG_URL
+    restart: always
+    networks:
+      - proxy
+    dns:
+      - 172.16.10.18
+      - 223.6.6.6
+    labels:
+      - "diun.enable=true"
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.lobe-secure.entrypoints=websecure"
+      - "traefik.http.routers.lobe-secure.tls=true"
+      - "traefik.http.routers.lobe-secure.rule=Host(`lobe.esxi.lan`)"
+      - "traefik.http.routers.lobe-secure.service=lobe-service"
+      - "traefik.http.services.lobe-service.loadbalancer.server.port=3210"
+
+networks:
+  proxy:
+    external: true

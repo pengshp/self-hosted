@@ -1,0 +1,56 @@
+---
+# version: '3.9'
+services:
+  miniflux:
+    image: miniflux/miniflux:latest
+    # ports:
+    #  - "9020:8080"
+    networks:
+      - proxy
+      - default
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=postgres://miniflux:secret@db/miniflux?sslmode=disable
+      - RUN_MIGRATIONS=1
+      - CREATE_ADMIN=1
+      - ADMIN_USERNAME=admin
+      - ADMIN_PASSWORD=xxxxxxx
+      - TZ='Asia/Shanghai'
+      - POLLING_FREQUENCY=1440 # 24h
+      - POLLING_SCHEDULER=entry_frequency
+      - SCHEDULER_ENTRY_FREQUENCY_MAX_INTERVAL=30
+      - BASE_URL=https://rss.esxi.lan
+    healthcheck:
+      test: ["CMD", "/usr/bin/miniflux", "-healthcheck", "auto"]
+    restart: always
+    labels:
+      - "diun.enable=true"
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.miniflux-secure.entrypoints=websecure"
+      - "traefik.http.routers.miniflux-secure.tls=true"
+      - "traefik.http.routers.miniflux-secure.rule=Host(`rss.esxi.lan`)"
+      - "traefik.http.routers.miniflux-secure.service=miniflux-service"
+      - "traefik.http.services.miniflux-service.loadbalancer.server.port=8080"
+
+  db:
+    image: postgres:13.6
+    environment:
+      - POSTGRES_USER=miniflux
+      - POSTGRES_PASSWORD=secret
+      - TZ='Asia/Shanghai'
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    restart: always
+    networks:
+      - default
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "miniflux"]
+      interval: 10s
+      start_period: 30s
+
+networks:
+  proxy:
+    external: true

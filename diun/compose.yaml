@@ -1,0 +1,19 @@
+---
+services:
+  diun:
+    image: crazymax/diun:latest
+    container_name: diun-c
+    command: serve
+    volumes:
+      - "./data:/data"
+      - "./diun.yml:/diun.yml:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    environment:
+      - "PUID=1000"
+      - "PGID=1000"
+      - "TZ=Asia/Shanghai"
+      - "HTTP_PROXY=socks5://172.16.10.18:7891"
+      - "HTTPS_PROXY=socks5://172.16.10.18:7891"
+      - "LOG_LEVEL=info"
+      - "LOG_JSON=false"
+    restart: always

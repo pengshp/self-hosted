@@ -1,0 +1,71 @@
+---
+version: "3.9"
+
+services:
+  one-api:
+    image: ghcr.io/martialbe/one-api:latest
+    container_name: one-api
+    restart: always
+    volumes:
+      - ./data/oneapi:/data
+      - ./data/logs:/app/logs
+    environment:
+      - SQL_DSN=oneapi:zxcvbnm@tcp(db:3306)/one-api
+      - REDIS_CONN_STRING=redis://redis
+      - SYNC_FREQUENCY=60
+      - SESSION_SECRET=zxcvbnm
+      - USER_TOKEN_SECRET=<token>
+      - TZ=Asia/Shanghai
+    depends_on:
+      - db
+      - redis
+    networks:
+      - oneapi
+      - proxy
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget -q -O - http://localhost:3000/api/status | grep -o '\"success\":\\s*true' | awk -F: '{print $$2}'",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    labels:
+      - "diun.enable=true"
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.oneapi-secure.entrypoints=websecure"
+      - "traefik.http.routers.oneapi-secure.tls=true"
+      - "traefik.http.routers.oneapi-secure.rule=Host(`api.esxi.lan`)"
+      - "traefik.http.routers.oneapi-secure.service=oneapi-service"
+      - "traefik.http.services.oneapi-service.loadbalancer.server.port=3000"
+
+  db:
+    image: mariadb:10.10
+    restart: always
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+    # ports:
+    #   - '3306:3306'
+    networks:
+      - oneapi
+    environment:
+      TZ: Asia/Shanghai
+      MYSQL_ROOT_PASSWORD: "<password>"
+      MYSQL_USER: oneapi
+      MYSQL_PASSWORD: "<pass>"
+      MYSQL_DATABASE: one-api
+
+  redis:
+    image: redis:7.2
+    container_name: redis
+    restart: always
+    networks:
+      - oneapi
+
+networks:
+  oneapi:
+    external: false
+  proxy:
+    external: true

@@ -1,0 +1,22 @@
+---
+# yaml-language-server: $schema=<urlToTheSchema|relativeFilePath|absoluteFilePath}>
+services:
+  linux-cli:
+    image: wcjiang/linux-command:latest
+    container_name: linux-cli-c
+    restart: always
+    networks:
+      - proxy
+    labels:
+      - "diun.enable=true"
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.cli-secure.entrypoints=websecure"
+      - "traefik.http.routers.cli-secure.tls=true"
+      - "traefik.http.routers.cli-secure.rule=Host(`cli.esxi.lan`)"
+      - "traefik.http.routers.cli-secure.service=cli-service"
+      - "traefik.http.services.cli-service.loadbalancer.server.port=3000"
+
+networks:
+  proxy:
+    external: true

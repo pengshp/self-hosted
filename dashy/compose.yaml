@@ -1,0 +1,28 @@
+---
+services:
+  dashy:
+    image: lissy93/dashy:latest
+    container_name: dashy-c
+    # ports:
+    #  - "6089:8080/tcp"
+    volumes:
+      - ./config/conf.yml:/app/user-data/conf.yml
+    environment:
+      - UID=1000
+      - GID=1000
+    networks:
+      - proxy
+    restart: unless-stopped
+    labels:
+      - "diun.enable=true"
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.dashy-secure.entrypoints=websecure"
+      - "traefik.http.routers.dashy-secure.tls=true"
+      - "traefik.http.routers.dashy-secure.rule=Host(`dashy.esxi.lan`)"
+      - "traefik.http.routers.dashy-secure.service=dashy-service"
+      - "traefik.http.services.dashy-service.loadbalancer.server.port=8080"
+
+networks:
+  proxy:
+    external: true
