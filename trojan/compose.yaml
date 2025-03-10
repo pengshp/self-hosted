@@ -1,0 +1,22 @@
+---
+services:
+  trojan:
+    image: trojangfw/trojan:latest
+    container_name: trojan-c
+    volumes:
+      - ./config:/config
+    depends_on:
+      - web
+    network_mode: host
+    restart: unless-stopped
+
+  web:
+    image: nginx:stable-alpine
+    container_name: nginx
+    volumes:
+      - ./html:/usr/share/nginx/html:ro
+    network_mode: host
+    restart: unless-stopped
+    environment:
+      - NGINX_HOST=<tj.xxxx.com>
+      - NGINX_PORT=80
