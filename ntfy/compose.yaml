@@ -1,7 +1,7 @@
 ---
 services:
   ntfy:
-    image: binwiederhier/ntfy
+    image: binwiederhier/ntfy:latest
     restart: unless-stopped
     networks:
       - proxy
@@ -17,6 +17,7 @@ services:
       - ./data:/var/lib/ntfy
     command: serve
     labels:
+      - "diun.enable=true"
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
       - "traefik.http.routers.ntfy.entrypoints=websecure"
