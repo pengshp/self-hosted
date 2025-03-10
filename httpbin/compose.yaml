@@ -1,0 +1,18 @@
+---
+services:
+  httpbin:
+    image: pengshp/httpbin:latest
+    container_name: httpbin-c
+    # ports:
+    #   - "8040:80"
+    network_mode: bridge
+    restart: unless-stopped
+    labels:
+      - "diun.enable=true"
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.httpbin-secure.entrypoints=websecure"
+      - "traefik.http.routers.httpbin-secure.tls=true"
+      - "traefik.http.routers.httpbin-secure.rule=Host(`httpbin.esxi.lan`)"
+      - "traefik.http.routers.httpbin-secure.service=httpbin-service"
+      - "traefik.http.services.httpbin-service.loadbalancer.server.port=80"

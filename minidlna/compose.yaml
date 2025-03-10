@@ -1,0 +1,13 @@
+---
+services:
+  minidlna:
+    image: pengshp/minidlna:latest
+    container_name: minidlna-c
+    volumes:
+      - ./data:/media
+      - ./config/:/etc/minidlna/
+    network_mode: host
+    environment:
+      - PUID=1000
+      - PGID=1000
+    restart: always
