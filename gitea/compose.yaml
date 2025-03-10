@@ -49,7 +49,7 @@ services:
       - gitea-net
     environment:
       - TZ=Asia/Shanghai
-      - MYSQL_ROOT_PASSWORD=zxcv
+      - MYSQL_ROOT_PASSWORD=<PASS>
       - MYSQL_DATABASE=gitea
       - MYSQL_USER=gitea
       - MYSQL_PASSWORD=gitea

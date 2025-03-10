@@ -18,6 +18,7 @@ services:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
       - "traefik.http.routers.n8n-secure.entrypoints=websecure"
+      - "traefik.http.routers.n8n-secure.tls=true"
       - "traefik.http.routers.n8n-secure.rule=Host(`n8n.esxi.lan`)"
       - "traefik.http.routers.n8n-secure.service=n8n-service"
       - "traefik.http.services.n8n-service.loadbalancer.server.port=5678"

@@ -19,7 +19,7 @@ services:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
       - "traefik.http.routers.ha-secure.entrypoints=websecure"
-      - "traefik.http.routers.lobe-secure.tls=true"
+      - "traefik.http.routers.ha-secure.tls=true"
       - "traefik.http.routers.ha-secure.rule=Host(`ha.esxi.lan`)"
       - "traefik.http.routers.ha-secure.service=ha-service"
       - "traefik.http.services.ha-service.loadbalancer.server.port=8123"

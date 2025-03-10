@@ -13,7 +13,7 @@ services:
       - SQL_DSN=oneapi:zxcvbnm@tcp(db:3306)/one-api
       - REDIS_CONN_STRING=redis://redis
       - SYNC_FREQUENCY=60
-      - SESSION_SECRET=zxcvbnm
+      - SESSION_SECRET=<SECRET>
       - USER_TOKEN_SECRET=<token>
       - TZ=Asia/Shanghai
     depends_on:

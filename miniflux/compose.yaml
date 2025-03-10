@@ -1,5 +1,4 @@
 ---
-# version: '3.9'
 services:
   miniflux:
     image: miniflux/miniflux:latest
@@ -12,11 +11,11 @@ services:
       db:
         condition: service_healthy
     environment:
-      - DATABASE_URL=postgres://miniflux:secret@db/miniflux?sslmode=disable
+      - DATABASE_URL=postgres://miniflux:<PASS>@db/miniflux?sslmode=disable
       - RUN_MIGRATIONS=1
       - CREATE_ADMIN=1
       - ADMIN_USERNAME=admin
-      - ADMIN_PASSWORD=xxxxxxx
+      - ADMIN_PASSWORD=<xxxxxxx>
       - TZ='Asia/Shanghai'
       - POLLING_FREQUENCY=1440 # 24h
       - POLLING_SCHEDULER=entry_frequency
@@ -39,7 +38,7 @@ services:
     image: postgres:13.6
     environment:
       - POSTGRES_USER=miniflux
-      - POSTGRES_PASSWORD=secret
+      - POSTGRES_PASSWORD=<PASS>
       - TZ='Asia/Shanghai'
     volumes:
       - ./data/db:/var/lib/postgresql/data
